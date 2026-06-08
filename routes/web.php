@@ -7,8 +7,11 @@ Route::get('/', function () {
         'service' => 'Orvix API',
         'status'  => 'ok',
         'endpoints' => [
-            'health' => '/up',
-            'proxy'  => 'POST /api/ai/proxy',
+            'health'   => '/up',
+            'briefing' => '/briefing.html',
+            'proxy'    => 'POST /api/ai/proxy',
         ],
     ]);
 });
+
+Route::redirect('/briefing', '/briefing.html');
