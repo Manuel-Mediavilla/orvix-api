@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Genera tu briefing de automatización con IA en 5 minutos. Herramienta gratuita de Orvix.">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Generador de Briefing de Automatización — Orvix">
+<meta property="og:description" content="Responde 6 preguntas. La IA genera tu briefing técnico profesional al instante.">
+<meta property="og:url" content="https://orvixio.netlify.app/briefing">
+<meta property="og:type" content="website">
+<title>Generador de Briefing de Automatización — Orvix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#090b15;--bg2:#0d1020;--bg3:#111428;--bg4:#181b2e;
+  --border:#1c2038;--border2:#252845;
+  --text:#f4f4f8;--muted2:#6b7199;--muted3:#a8adc8;
+  --purple:#7c5cfc;--purple-d:#6344e8;--purple-dim:rgba(124,92,252,0.1);--purple-glow:rgba(124,92,252,0.3);
+  --mint:#4dffc3;--mint-dim:rgba(77,255,195,0.07);
+  --red:#ff4d6d;--red-dim:rgba(255,77,109,0.08);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+.glow-tl{position:fixed;top:-100px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,180,120,0.09) 0%,transparent 65%);pointer-events:none;z-index:0}
+.glow-br{position:fixed;bottom:-100px;right:-100px;width:450px;height:450px;background:radial-gradient(circle,rgba(124,92,252,0.09) 0%,transparent 65%);pointer-events:none;z-index:0}
+canvas#ptx{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3}
+nav{position:sticky;top:0;z-index:100;background:rgba(9,11,21,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:58px}
+.nav-logo{font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)}
+.ndot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.lang-toggle{display:flex;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.lang-btn{padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:none;background:none;color:var(--muted2);font-family:'Syne',sans-serif}
+.lang-btn.active{background:var(--purple);color:#fff}
+.nav-badge{background:var(--purple-dim);border:1px solid rgba(124,92,252,0.25);color:#c4b5fd;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:20px}
+.hero{position:relative;z-index:1;padding:56px 5% 40px;text-align:center}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;background:var(--mint-dim);border:1px solid rgba(77,255,195,0.2);color:var(--mint);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:var(--mint);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-size:clamp(28px,4.5vw,54px);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:12px}
+.h1-p{color:var(--purple)}.h1-m{color:var(--mint)}
+.hero-sub{font-size:15px;color:var(--muted3);max-width:500px;margin:0 auto 8px;line-height:1.6}
+.hero-note{font-size:12px;color:var(--muted2);margin-bottom:32px}
+.hero-note span{color:var(--mint)}
+.progress-wrap{position:relative;z-index:1;max-width:700px;margin:0 auto 28px;padding:0 5%}
+.progress-bar-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--mint));border-radius:2px;transition:width .5s ease}
+.progress-steps{display:flex;justify-content:space-between}
+.ps{font-size:10px;color:var(--muted2);font-weight:600;letter-spacing:.5px;transition:color .3s}
+.ps.active{color:var(--mint)}.ps.done{color:var(--purple)}
+.steps-wrap{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 5% 56px}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.step-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;margin-bottom:14px}
+.step-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--mint);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.step-num::after{content:'';flex:1;height:1px;background:rgba(77,255,195,0.15)}
+.step-h{font-size:20px;font-weight:800;letter-spacing:-.8px;margin-bottom:5px}
+.step-sub{font-size:13px;color:var(--muted3);margin-bottom:22px;line-height:1.5}
+.fl{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;margin-top:16px}
+.fl:first-of-type{margin-top:0}
+input[type=text],input[type=email],textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;line-height:1.5}
+input[type=text]:focus,input[type=email]:focus,textarea:focus,select:focus{border-color:rgba(124,92,252,0.45);box-shadow:0 0 0 3px rgba(124,92,252,0.07)}
+textarea{resize:vertical;min-height:88px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23556' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+select option{background:#181b2e}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}
+.check-item{background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px 13px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:9px;user-select:none}
+.check-item:hover{border-color:rgba(124,92,252,0.3)}
+.check-item.on{background:var(--purple-dim);border-color:rgba(124,92,252,0.4)}
+.check-box{width:17px;height:17px;border-radius:5px;border:1px solid var(--border2);background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .15s;margin-top:1px}
+.check-item.on .check-box{background:var(--purple);border-color:var(--purple);color:#fff}
+.check-label{font-size:12px;line-height:1.4;color:var(--text)}
+.check-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.urgency-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:6px}
+.urg-item{background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:14px 8px;cursor:pointer;text-align:center;transition:all .15s;user-select:none}
+.urg-item:hover{border-color:rgba(124,92,252,0.3)}
+.urg-item.on{background:var(--purple-dim);border-color:rgba(124,92,252,0.4)}
+.urg-label{font-size:12px;font-weight:700;display:block;color:var(--text)}
+.urg-sub{font-size:10px;color:var(--muted2);margin-top:3px}
+.urg-bar{width:24px;height:3px;border-radius:2px;background:var(--purple);margin:8px auto 0;opacity:0;transition:opacity .2s}
+.urg-item.on .urg-bar{opacity:1}
+.budget-display{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--mint);text-align:center;margin:14px 0 7px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border2);border-radius:2px;outline:none;border:none;padding:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--purple);cursor:pointer;box-shadow:0 0 10px var(--purple-glow)}
+.budget-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted2);margin-top:5px;font-family:'DM Mono',monospace}
+.nav-btns{display:flex;gap:10px;margin-top:8px}
+.btn-next{flex:1;padding:13px;background:var(--purple);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;border:none;border-radius:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-next:hover{background:var(--purple-d);box-shadow:0 6px 24px var(--purple-glow);transform:translateY(-1px)}
+.btn-next:disabled{background:var(--bg4);color:var(--muted2);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-back{padding:13px 18px;background:var(--bg3);color:var(--muted3);font-family:'Syne',sans-serif;font-weight:600;font-size:13px;border:1px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .2s}
+.btn-back:hover{color:var(--text);border-color:var(--border)}
+.err{background:var(--red-dim);border:1px solid rgba(255,77,109,0.2);color:var(--red);font-size:12px;padding:9px 13px;border-radius:8px;margin-top:10px;display:none}
+.err.show{display:block}
+.captcha-box{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px 18px;margin-top:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.captcha-left{display:flex;align-items:center;gap:10px}
+.captcha-eq{font-family:'DM Mono',monospace;font-size:20px;color:var(--mint);font-weight:500;letter-spacing:1px}
+.captcha-inp{width:64px!important;text-align:center;font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
+.captcha-refresh{background:none;border:1px solid var(--border2);color:var(--muted2);font-size:13px;cursor:pointer;padding:5px 10px;border-radius:6px;transition:all .2s;font-family:'Syne',sans-serif}
+.captcha-refresh:hover{color:var(--mint);border-color:rgba(77,255,195,0.3)}
+.captcha-status{font-size:12px;font-weight:600;transition:all .3s;margin-left:auto}
+.captcha-status.ok{color:var(--mint)}.captcha-status.bad{color:var(--red)}
+.rgpd-block{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:18px;margin-top:12px}
+.rgpd-row{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.rgpd-row:last-of-type{border-bottom:none}
+.rgpd-check{width:18px;height:18px;border-radius:5px;border:1px solid var(--border2);background:var(--bg4);cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s}
+.rgpd-check.on{background:var(--purple);border-color:var(--purple);color:#fff}
+.rgpd-text{font-size:12px;color:var(--muted3);line-height:1.55;cursor:pointer}
+.rgpd-text a{color:var(--purple);text-decoration:none}
+.rgpd-text a:hover{text-decoration:underline}
+.rgpd-required{color:var(--red);margin-left:2px;font-weight:700}
+.rgpd-info{background:rgba(124,92,252,0.05);border:1px solid rgba(124,92,252,0.12);border-radius:8px;padding:12px 14px;margin-top:14px}
+.rgpd-info-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.rgpd-info-text{font-size:11px;color:var(--muted2);line-height:1.6}
+.gen-screen{display:none;position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 5% 56px;text-align:center}
+.gen-screen.active{display:block}
+.gen-orb{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-d));margin:36px auto 22px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px var(--purple-glow);animation:orb 2s ease-in-out infinite}
+@keyframes orb{0%,100%{transform:scale(1);box-shadow:0 0 40px var(--purple-glow)}50%{transform:scale(1.08);box-shadow:0 0 80px var(--purple-glow)}}
+.gen-orb-inner{width:32px;height:32px;border:2px solid rgba(255,255,255,0.6);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-title{font-size:22px;font-weight:800;letter-spacing:-.8px;margin-bottom:7px}
+.gen-sub{font-size:13px;color:var(--muted3);margin-bottom:28px}
+.gen-steps{text-align:left;max-width:360px;margin:0 auto}
+.gen-step{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted2);transition:color .3s}
+.gen-step:last-child{border-bottom:none}
+.gen-step.done{color:var(--mint)}.gen-step.active-s{color:var(--text)}
+.gen-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s}
+.gen-step.done .gen-dot{background:var(--mint)}
+.gen-step.active-s .gen-dot{background:var(--purple);animation:pulse 1s infinite}
+.result-wrap{display:none;position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 5% 56px}
+.result-wrap.active{display:block;animation:fadeIn .4s ease}
+.briefing-doc{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.doc-header{background:linear-gradient(135deg,rgba(124,92,252,0.08),rgba(77,255,195,0.05));border-bottom:1px solid var(--border2);padding:26px 30px;position:relative}
+.doc-header::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--mint))}
+.doc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--purple-dim);border:1px solid rgba(124,92,252,0.2);color:#c4b5fd;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.doc-title{font-size:20px;font-weight:800;letter-spacing:-.8px;margin-bottom:8px}
+.doc-meta{display:flex;gap:20px;flex-wrap:wrap}
+.doc-meta-item{font-size:12px;color:var(--muted3)}
+.doc-meta-item span{color:var(--text);font-weight:600}
+.doc-body{padding:28px}
+.doc-section{margin-bottom:24px}
+.doc-section:last-child{margin-bottom:0}
+.doc-section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mint);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.doc-section-title::after{content:'';flex:1;height:1px;background:rgba(77,255,195,0.15)}
+.doc-content{font-size:13px;color:var(--muted3);line-height:1.85;white-space:pre-wrap}
+.doc-content strong{color:var(--text);font-weight:600}
+.score-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.score-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.score-val{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--purple);line-height:1;margin-bottom:4px}
+.score-val.mint{color:var(--mint)}.score-val.amber{color:#ffb347}
+.score-key{font-size:10px;color:var(--muted2);letter-spacing:.5px}
+.tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;font-size:12px;color:var(--muted3)}
+.tag.purple{background:var(--purple-dim);border-color:rgba(124,92,252,0.25);color:#c4b5fd}
+.action-row{display:flex;gap:10px;margin-bottom:12px}
+.act-btn{flex:1;padding:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.act-primary{background:var(--purple);color:#fff;border:none}
+.act-primary:hover{background:var(--purple-d);box-shadow:0 4px 20px var(--purple-glow)}
+.act-secondary{background:var(--bg3);color:var(--muted3);border:1px solid var(--border2)}
+.act-secondary:hover{color:var(--text);border-color:var(--border)}
+.act-mint{background:var(--mint-dim);color:var(--mint);border:1px solid rgba(77,255,195,0.2)}
+.act-mint:hover{background:rgba(77,255,195,0.12)}
+.li-block{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:22px;margin-bottom:12px}
+.li-header{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.li-icon{background:#0a66c2;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:4px;letter-spacing:.5px;font-family:'DM Mono',monospace}
+.li-title{font-size:13px;font-weight:700}
+.li-sub{font-size:12px;color:var(--muted3);margin-bottom:12px;line-height:1.5}
+.li-post{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;font-size:12px;color:var(--muted3);line-height:1.8;margin-bottom:12px;font-family:'Syne',sans-serif;max-height:180px;overflow-y:auto}
+.li-btns{display:flex;gap:8px}
+.li-btn{padding:9px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;border:none}
+.li-share{background:#0a66c2;color:#fff}
+.li-share:hover{background:#0958a8}
+.li-copy{background:var(--bg3);color:var(--muted3);border:1px solid var(--border2)}
+.li-copy:hover{color:var(--text)}
+.gate-block{background:var(--purple-dim);border:1px solid rgba(124,92,252,0.2);border-radius:14px;padding:24px;text-align:center}
+.gate-h{font-size:16px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px}
+.gate-p{font-size:13px;color:var(--muted3);margin-bottom:16px;line-height:1.6}
+.gate-row{display:flex;gap:9px}
+.gate-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px 13px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.gate-inp:focus{border-color:rgba(124,92,252,0.4)}
+.gate-go{background:var(--purple);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:11px 18px;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.gate-go:hover{background:var(--purple-d);box-shadow:0 4px 20px var(--purple-glow)}
+footer{position:relative;z-index:1;padding:22px 5%;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--bg)}
+.fl-logo{font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text)}
+.fldot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.fl-links{display:flex;gap:16px}
+.fl-links a{font-size:11px;color:var(--muted2);text-decoration:none;transition:color .2s}
+.fl-links a:hover{color:var(--mint)}
+.fl-copy{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace}
+@media(max-width:580px){
+  .check-grid,.grid2,.urgency-grid,.score-row,.action-row,.li-btns,.gate-row{grid-template-columns:1fr;flex-direction:column}
+  .urgency-grid{grid-template-columns:1fr 1fr}
+  .doc-meta{flex-direction:column;gap:6px}
+  .captcha-box{gap:10px}
+  nav{padding:0 4%}
+  .hero{padding:40px 4% 28px}
+}
+</style>
+</head>
+<body>
+<div class="glow-tl"></div><div class="glow-br"></div>
+<canvas id="ptx"></canvas>
+<nav>
+  <a class="nav-logo" href="https://orvixio.netlify.app"><div class="ndot"></div>ORVIX</a>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="nav-badge" id="navBadge">Generador de Briefing</div>
+  </div>
+</nav>
+<div class="hero">
+  <div class="hero-pill"><div class="pill-dot"></div><span id="pillText">IA · 5 min · Gratis</span></div>
+  <h1><span class="h1-p" id="h1a">Tu briefing</span> <span class="h1-m" id="h1b">de automatización,</span><br><span id="h1c">listo en minutos.</span></h1>
+  <p class="hero-sub" id="heroSub">Responde 6 preguntas sobre tu negocio. La IA genera un briefing técnico profesional completo, listo para enviar, implementar o compartir.</p>
+  <p class="hero-note"><span>247+</span> <span id="heroNote">briefings generados · Agencias, clínicas, restaurantes y equipos SaaS</span></p>
+</div>
+<div class="progress-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill" style="width:0%"></div></div>
+  <div class="progress-steps" id="progressSteps"></div>
+</div>
+<div class="steps-wrap" id="stepsWrap">
+  <div class="step active" id="step0">
+    <div class="step-card">
+      <div class="step-num" id="sn0"></div>
+      <div class="step-h" id="s0h">Cuéntanos sobre tu negocio</div>
+      <p class="step-sub" id="s0sub">Esto define todo el briefing: flujos, herramientas y automatizaciones recomendadas.</p>
+      <label class="fl" id="s0l1">Nombre del negocio</label>
+      <input type="text" id="bizName" placeholder="ej. Clínica Salud Madrid">
+      <div class="grid2" style="margin-top:14px">
+        <div><label class="fl" style="margin-top:0" id="s0l2">Sector</label><select id="sector"></select></div>
+        <div><label class="fl" style="margin-top:0" id="s0l3">Tamaño del equipo</label><select id="teamSize"></select></div>
+      </div>
+      <label class="fl" id="s0l4">Describe tu negocio</label>
+      <textarea id="bizDesc" placeholder="ej. Clínica de fisioterapia con 4 terapeutas. 30-50 citas al día y consultas de WhatsApp manuales."></textarea>
+    </div>
+    <div class="nav-btns"><button class="btn-next" onclick="nextStep(0)"><span id="bc0">Continuar</span> →</button></div>
+    <div class="err" id="err0"></div>
+  </div>
+  <div class="step" id="step1">
+    <div class="step-card">
+      <div class="step-num" id="sn1"></div>
+      <div class="step-h" id="s1h">¿Dónde se pierde el tiempo?</div>
+      <p class="step-sub" id="s1sub">Selecciona los procesos manuales que más tiempo consumen.</p>
+      <label class="fl" style="margin-top:0" id="s1l1">Procesos manuales actuales</label>
+      <div class="check-grid" id="processGrid"></div>
+      <label class="fl" id="s1l2">Tu mayor frustración del día a día</label>
+      <textarea id="frustration" placeholder="ej. 2 horas cada mañana respondiendo los mismos mensajes de WhatsApp."></textarea>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep(1)">←</button>
+      <button class="btn-next" onclick="nextStep(1)"><span id="bc1">Continuar</span> →</button>
+    </div>
+    <div class="err" id="err1"></div>
+  </div>
+  <div class="step" id="step2">
+    <div class="step-card">
+      <div class="step-num" id="sn2"></div>
+      <div class="step-h" id="s2h">¿Qué es el éxito para ti?</div>
+      <p class="step-sub" id="s2sub">Cuanto más claro seas, más específico será el plan.</p>
+      <label class="fl" style="margin-top:0" id="s2l1">Objetivo principal</label>
+      <select id="primaryGoal"></select>
+      <label class="fl" id="s2l2">Resultado esperado en 90 días</label>
+      <textarea id="outcome90" placeholder="ej. Reserva de citas 100% automatizada. Cero tiempo en agendas."></textarea>
+      <label class="fl" id="s2l3">Urgencia</label>
+      <div class="urgency-grid" id="urgencyGrid"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep(2)">←</button>
+      <button class="btn-next" onclick="nextStep(2)"><span id="bc2">Continuar</span> →</button>
+    </div>
+    <div class="err" id="err2"></div>
+  </div>
+  <div class="step" id="step3">
+    <div class="step-card">
+      <div class="step-num" id="sn3"></div>
+      <div class="step-h" id="s3h">¿Qué herramientas usas ya?</div>
+      <p class="step-sub" id="s3sub">Construimos automatizaciones que se conectan a lo que ya tienes.</p>
+      <label class="fl" style="margin-top:0" id="s3l1">Comunicación</label>
+      <div class="check-grid" id="commGrid"></div>
+      <label class="fl" id="s3l2">Gestión y CRM</label>
+      <div class="check-grid" id="crmGrid"></div>
+      <label class="fl" id="s3l3">Nivel técnico del equipo</label>
+      <select id="techLevel"></select>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep(3)">←</button>
+      <button class="btn-next" onclick="nextStep(3)"><span id="bc3">Continuar</span> →</button>
+    </div>
+  </div>
+  <div class="step" id="step4">
+    <div class="step-card">
+      <div class="step-num" id="sn4"></div>
+      <div class="step-h" id="s4h">¿Cuál es tu presupuesto?</div>
+      <p class="step-sub" id="s4sub">Soluciones desde 149€ hasta implementaciones empresariales.</p>
+      <div class="budget-display" id="budgetDisplay">500€</div>
+      <input type="range" id="budgetRange" min="0" max="9" step="1" value="3" oninput="updateBudget()">
+      <div class="budget-labels" id="budgetLabels"></div>
+      <label class="fl" id="s4l2">Modelo de colaboración</label>
+      <select id="engModel"></select>
+      <label class="fl" id="s4l3">Plazo de decisión</label>
+      <select id="timeline"></select>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep(4)">←</button>
+      <button class="btn-next" onclick="nextStep(4)"><span id="bc4">Continuar</span> →</button>
+    </div>
+  </div>
+  <div class="step" id="step5">
+    <div class="step-card">
+      <div class="step-num" id="sn5"></div>
+      <div class="step-h" id="s5h">Casi listo</div>
+      <p class="step-sub" id="s5sub">Tu briefing se genera al instante. Recibirás PDF y una llamada estratégica gratuita con Orvix.</p>
+      <label class="fl" id="s5l1">Nombre completo</label>
+      <input type="text" id="contactName" placeholder="Tu nombre">
+      <div class="grid2" style="margin-top:0">
+        <div><label class="fl" id="s5l2">Email</label><input type="email" id="contactEmail" placeholder="tu@email.com"></div>
+        <div><label class="fl" id="s5l3">WhatsApp (opcional)</label><input type="text" id="contactPhone" placeholder="+34 600 000 000"></div>
+      </div>
+      <label class="fl" id="s5l4">Información adicional (opcional)</label>
+      <textarea id="extraNotes" placeholder="Restricciones, software a conservar, experiencias previas..." style="min-height:64px"></textarea>
+      <label class="fl" style="margin-top:20px" id="captchaLbl">Verificación de seguridad</label>
+      <div class="captcha-box">
+        <div class="captcha-left">
+          <span class="captcha-eq" id="captchaEq">? + ? =</span>
+          <input type="text" id="captchaInp" class="captcha-inp" maxlength="3" placeholder="?" oninput="checkCaptcha()" autocomplete="off">
+          <button class="captcha-refresh" onclick="newCaptcha()" id="refreshBtn">Nueva</button>
+        </div>
+        <div class="captcha-status" id="captchaStatus"></div>
+      </div>
+      <label class="fl" style="margin-top:18px" id="rgpdLbl">Protección de datos</label>
+      <div class="rgpd-block">
+        <div class="rgpd-row" onclick="toggleRgpd('r1')">
+          <div class="rgpd-check" id="r1"></div>
+          <div class="rgpd-text" id="rgpd1txt">He leído y acepto la <a href="/privacidad">Política de Privacidad</a> y los <a href="/terminos">Términos de uso</a> de Orvix.<span class="rgpd-required">*</span></div>
+        </div>
+        <div class="rgpd-row" onclick="toggleRgpd('r2')">
+          <div class="rgpd-check" id="r2"></div>
+          <div class="rgpd-text" id="rgpd2txt">Acepto recibir comunicaciones comerciales de Orvix. Puedo darme de baja en cualquier momento.</div>
+        </div>
+        <div class="rgpd-row" onclick="toggleRgpd('r3')">
+          <div class="rgpd-check" id="r3"></div>
+          <div class="rgpd-text" id="rgpd3txt">Acepto que Orvix me contacte para ofrecer una llamada estratégica gratuita sobre mi briefing.</div>
+        </div>
+        <div class="rgpd-info">
+          <div class="rgpd-info-title" id="rgpdInfoTitle">Información sobre protección de datos</div>
+          <div class="rgpd-info-text" id="rgpdInfoText">Responsable: Orvix · Finalidad: Generar tu briefing y contactarte si lo autorizas · Derechos: hola@orvix.es · Más info: <a href="/privacidad" style="color:var(--purple)">Política de Privacidad</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep(5)">←</button>
+      <button class="btn-next" id="genBtn" onclick="generateBriefing()" disabled><span id="btnGenerate">Generar mi briefing</span> →</button>
+    </div>
+    <div class="err" id="err5"></div>
+  </div>
+</div>
+<div class="gen-screen" id="genScreen">
+  <div class="gen-orb"><div class="gen-orb-inner"></div></div>
+  <div class="gen-title" id="genTitle">Generando tu briefing...</div>
+  <div class="gen-sub" id="genSub">La IA está analizando tus datos y construyendo tu plan personalizado.</div>
+  <div class="gen-steps" id="genSteps"></div>
+</div>
+<div class="result-wrap" id="resultWrap">
+  <div class="briefing-doc">
+    <div class="doc-header">
+      <div class="doc-badge" id="docBadge">Briefing de Automatización · Orvix AI</div>
+      <div class="doc-title" id="docTitle">—</div>
+      <div class="doc-meta">
+        <div class="doc-meta-item"><span id="mSec">Sector</span>: <span id="docSector">—</span></div>
+        <div class="doc-meta-item"><span id="mTeam">Equipo</span>: <span id="docTeam">—</span></div>
+        <div class="doc-meta-item"><span id="mBudget">Presupuesto</span>: <span id="docBudget">—</span></div>
+        <div class="doc-meta-item"><span id="mDate">Generado</span>: <span id="docDate">—</span></div>
+      </div>
+    </div>
+    <div class="doc-body">
+      <div class="score-row">
+        <div class="score-card"><div class="score-val mint" id="scoreROI">—</div><div class="score-key" id="scoreROIKey">Ahorro anual estimado</div></div>
+        <div class="score-card"><div class="score-val" id="scoreTime">—</div><div class="score-key" id="scoreTimeKey">Horas ahorradas / semana</div></div>
+        <div class="score-card"><div class="score-val amber" id="scorePayback">—</div><div class="score-key" id="scorePaybackKey">Retorno de inversión</div></div>
+      </div>
+      <div class="doc-section"><div class="doc-section-title" id="sec1">Resumen Ejecutivo</div><div class="doc-content" id="secSummary">—</div></div>
+      <div class="doc-section"><div class="doc-section-title" id="sec2">Oportunidades de Automatización</div><div class="doc-content" id="secOpportunities">—</div></div>
+      <div class="doc-section"><div class="doc-section-title" id="sec3">Stack Tecnológico Recomendado</div><div class="tags-row" id="secStack"></div></div>
+      <div class="doc-section"><div class="doc-section-title" id="sec4">Hoja de Ruta</div><div class="doc-content" id="secRoadmap">—</div></div>
+      <div class="doc-section"><div class="doc-section-title" id="sec5">Análisis de ROI</div><div class="doc-content" id="secROI">—</div></div>
+      <div class="doc-section"><div class="doc-section-title" id="sec6">Próximos Pasos con Orvix</div><div class="doc-content" id="secNext">—</div></div>
+    </div>
+  </div>
+  <div class="action-row">
+    <button class="act-btn act-primary" onclick="copyBriefing()" id="actCopyBtn"><span id="actCopy">Copiar briefing</span></button>
+    <button class="act-btn act-mint" onclick="resetTool()"><span id="actNew">Nuevo briefing</span></button>
+    <button class="act-btn act-secondary" onclick="window.open('https://orvixio.netlify.app','_blank')"><span id="actCall">Reservar llamada</span> →</button>
+  </div>
+  <div class="li-block">
+    <div class="li-header"><div class="li-icon">in</div><div class="li-title" id="liTitle">Comparte tu resultado en LinkedIn</div></div>
+    <div class="li-sub" id="liSub">Este tipo de post consigue 10-30k impresiones. Tu red te preguntará cómo lo hiciste.</div>
+    <div class="li-post" id="liPost">—</div>
+    <div class="li-btns">
+      <button class="li-btn li-share" onclick="shareLinkedIn()">Share on LinkedIn</button>
+      <button class="li-btn li-copy" id="liCopyBtn" onclick="copyLiPost()"><span id="liCopy">Copiar texto</span></button>
+    </div>
+  </div>
+  <div class="gate-block">
+    <div class="gate-h" id="gateH">Recibe el PDF + llamada estratégica gratis</div>
+    <div class="gate-p" id="gateP">Te enviamos el briefing en PDF y reservamos una llamada de 30 min con un especialista de Orvix.</div>
+    <div class="gate-row">
+      <input class="gate-inp" type="email" id="gateEmail" placeholder="tu@email.com">
+      <button class="gate-go" onclick="submitGate()"><span id="gateCta">Enviar PDF</span> →</button>
+    </div>
+  </div>
+</div>
+<footer>
+  <a class="fl-logo" href="https://orvixio.netlify.app"><div class="fldot"></div>ORVIX</a>
+  <div class="fl-links">
+    <a href="/privacidad" id="footPrivacy">Privacidad</a>
+    <a href="/terminos" id="footTerms">Términos</a>
+    <a href="/rgpd" id="footRgpd">RGPD</a>
+    <a href="https://orvixio.netlify.app" target="_blank">orvixio.netlify.app</a>
+  </div>
+  <div class="fl-copy">© 2025 Orvix · Cantabria, España</div>
+</footer>
+
+<script>
+  // ─── CONFIGURACIÓN DEL PROXY ─────────────────────────────
+  window.AI_PROXY_URL = '/api/ai/proxy';
+  // ──────────────────────────────────────────────────────────
+</script>
+<script>
+const T={
+  es:{
+    navBadge:'Generador de Briefing',pillText:'IA · 5 min · Gratis',h1a:'Tu briefing',h1b:'de automatización,',h1c:'listo en minutos.',
+    heroSub:'Responde 6 preguntas sobre tu negocio. La IA genera un briefing técnico profesional, listo para enviar, implementar o compartir.',
+    heroNote:'briefings generados · Agencias, clínicas, restaurantes y equipos SaaS',
+    steps:['Negocio','Procesos','Objetivos','Tecnología','Presupuesto','Contacto'],
+    stepTopics:['Perfil del negocio','Puntos de dolor','Objetivos','Stack actual','Inversión','Datos de contacto'],
+    s0h:'Cuéntanos sobre tu negocio',s0sub:'Esto define el briefing completo.',s0l1:'Nombre del negocio',s0l2:'Sector',s0l3:'Tamaño del equipo',s0l4:'Describe tu negocio',
+    sectors:[['Clínica / Salud'],['Belleza / Salón'],['Gimnasio / Fitness'],['Academia / Educación'],['Restaurante / Hostelería'],['Taller / Mecánica'],['Inmobiliaria'],['Agencia Digital'],['E-commerce / Retail'],['Legal / Consultoría'],['SaaS / Tech'],['Otro']],
+    teamSizes:[['solo','Solo — solo yo'],['small','2-10 personas'],['medium','11-50 personas'],['large','50+ personas']],
+    s1h:'¿Dónde se pierde el tiempo?',s1sub:'Selecciona los procesos manuales que más tiempo consumen.',s1l1:'Procesos manuales actuales',s1l2:'Tu mayor frustración del día a día',
+    processes:[['Mensajes y WhatsApp','Las mismas preguntas cada día'],['Gestión de citas','Calendario, confirmaciones, recordatorios'],['Cualificación de leads','Filtrar y hacer seguimiento'],['Facturación y cobros','Crear y perseguir facturas'],['Informes y analítica','Informes manuales semanales'],['Onboarding de clientes','Info, contratos y formularios'],['Coordinación interna','Tareas y seguimiento de equipo'],['Redes sociales','Publicar, programar y responder']],
+    s2h:'¿Qué es el éxito para ti?',s2sub:'Cuanto más claro seas, más específico el plan.',s2l1:'Objetivo principal',s2l2:'Resultado esperado en 90 días',s2l3:'Urgencia',
+    goals:[['Ahorrar tiempo — recuperar 2+ horas al día'],['Crecer sin contratar más personal'],['Mejorar la experiencia del cliente'],['Reducir errores y trabajo manual'],['Escalar — sistemas que funcionan sin mí']],
+    urgencies:[['Explorando','Sin prisa'],['Planificando','Próximamente'],['Urgente','Este mes'],['Crítico','Para ayer']],
+    urgencyVals:['Explorando','Planificando','Urgente','Crítico'],
+    s3h:'¿Qué herramientas usas ya?',s3sub:'Construimos automatizaciones que conectan con lo que ya tienes.',s3l1:'Comunicación',s3l2:'Gestión y CRM',s3l3:'Nivel técnico del equipo',
+    commTools:[['WhatsApp Business'],['Gmail / Google Workspace'],['Slack'],['Instagram / Facebook']],
+    crmTools:[['Google Sheets / Excel'],['Notion / Airtable'],['HubSpot / Salesforce'],['Software propio / ERP']],
+    techLevels:[['non-technical','No técnico — necesito que lo gestionen todo'],['basic','Básico — puedo seguir instrucciones'],['intermediate','Intermedio — puedo configurar herramientas'],['technical','Técnico — tengo desarrollador en el equipo']],
+    s4h:'¿Cuál es tu presupuesto?',s4sub:'Soluciones desde 149€.',s4l2:'Modelo de colaboración',s4l3:'Plazo de decisión',
+    budgetLabels:['149€','500€','2K€','5K€','10K+'],budgetVals:['149€','500€','500-1K€','1K-2K€','2K-5K€','5K-10K€','10K-20K€','20K-50K€','50K+€','Consultar'],
+    engModels:[['proyecto único','Proyecto único — lo construimos, hecho'],['proyecto + mantenimiento','Proyecto + mantenimiento mensual'],['retainer mensual','Retainer mensual — socio continuo'],['externalización total','Externalización total']],
+    timelines:[['esta semana','Esta semana'],['este mes','Este mes'],['próximo trimestre','Próximo trimestre'],['solo explorando','Solo explorando']],
+    s5h:'Casi listo',s5sub:'Tu briefing se genera al instante. Recibirás PDF y llamada estratégica gratuita.',
+    s5l1:'Nombre completo',s5l2:'Email',s5l3:'WhatsApp (opcional)',s5l4:'Información adicional (opcional)',
+    captchaLbl:'Verificación de seguridad',captchaOk:'Verificado',captchaWrong:'Respuesta incorrecta',refreshBtn:'Nueva',
+    rgpdLbl:'Protección de datos',
+    rgpd1txt:'He leído y acepto la <a href="/privacidad">Política de Privacidad</a> y los <a href="/terminos">Términos de uso</a> de Orvix.<span class="rgpd-required">*</span>',
+    rgpd2txt:'Acepto recibir comunicaciones comerciales de Orvix. Me puedo dar de baja en cualquier momento.',
+    rgpd3txt:'Acepto que Orvix me contacte para ofrecer una llamada estratégica gratuita.',
+    rgpdInfoTitle:'Información sobre protección de datos',
+    rgpdInfoText:'Responsable: Orvix · Finalidad: Generar tu briefing y contactarte si lo autorizas · Derechos: hola@orvix.es · Más info: <a href="/privacidad" style="color:var(--purple)">Política de Privacidad</a>',
+    btnContinue:'Continuar',btnGenerate:'Generar mi briefing',
+    genTitle:'Generando tu briefing...',genSub:'La IA está analizando tus datos y construyendo tu plan personalizado.',
+    genStepsList:['Analizando perfil del negocio y sector','Mapeando procesos a automatizaciones','Seleccionando herramientas e integraciones','Calculando ROI y plazos','Redactando resumen ejecutivo','Finalizando el documento'],
+    docBadge:'Briefing de Automatización · Orvix AI',mSec:'Sector',mTeam:'Equipo',mBudget:'Presupuesto',mDate:'Generado',
+    scoreROIKey:'Ahorro anual estimado',scoreTimeKey:'Horas ahorradas / semana',scorePaybackKey:'Retorno de inversión',
+    sec1:'Resumen Ejecutivo',sec2:'Oportunidades de Automatización',sec3:'Stack Tecnológico Recomendado',sec4:'Hoja de Ruta',sec5:'Análisis de ROI',sec6:'Próximos Pasos con Orvix',
+    actCopy:'Copiar briefing',actNew:'Nuevo briefing',actCall:'Reservar llamada',
+    liTitle:'Comparte tu resultado en LinkedIn',liSub:'Este tipo de post consigue 10-30k impresiones.',liCopy:'Copiar texto',
+    gateH:'Recibe el PDF + llamada estratégica gratis',gateP:'Te enviamos el briefing en PDF y reservamos una llamada de 30 min con un especialista de Orvix.',gateCta:'Enviar PDF',
+    footPrivacy:'Privacidad',footTerms:'Términos',footRgpd:'RGPD',
+    err0:'Por favor, rellena todos los campos.',err1:'Describe tu principal frustración.',err2:'Describe el resultado esperado en 90 días.',err5:'Completa la verificación y acepta la política de privacidad.',
+  },
+  en:{
+    navBadge:'Briefing Generator',pillText:'AI · 5 min · Free',h1a:'Your automation',h1b:'briefing,',h1c:'done in minutes.',
+    heroSub:'Answer 6 questions about your business. The AI generates a complete professional automation briefing, ready to send, implement or share.',
+    heroNote:'briefings generated · Agencies, clinics, restaurants & SaaS teams',
+    steps:['Business','Processes','Goals','Tech','Budget','Contact'],
+    stepTopics:['Business profile','Pain points','Objectives','Current stack','Investment','Contact details'],
+    s0h:'Tell us about your business',s0sub:'This shapes everything — workflows, tools and automations.',s0l1:'Business name',s0l2:'Sector',s0l3:'Team size',s0l4:'Describe your business',
+    sectors:[['Clinic / Health'],['Beauty / Salon'],['Gym / Fitness'],['Academy / Education'],['Restaurant / Hospitality'],['Auto Repair / Garage'],['Real Estate'],['Digital Agency'],['E-commerce / Retail'],['Legal / Consulting'],['SaaS / Tech'],['Other']],
+    teamSizes:[['solo','Solo — just me'],['small','2-10 people'],['medium','11-50 people'],['large','50+ people']],
+    s1h:'Where does time get wasted?',s1sub:'Select all the manual processes eating your team\'s time.',s1l1:'Current manual processes',s1l2:'Your biggest daily frustration',
+    processes:[['Customer messages & WhatsApp','Answering the same questions daily'],['Appointment scheduling','Calendar, confirmations, reminders'],['Lead qualification','Filtering & following up'],['Invoicing & payments','Creating and chasing invoices'],['Reporting & analytics','Weekly reports done manually'],['Client onboarding','Info, contracts and intake forms'],['Internal coordination','Task assignment and follow-up'],['Social media & content','Posting, scheduling, responding']],
+    s2h:'What does success look like?',s2sub:'The clearer your goals, the more specific your plan.',s2l1:'Primary goal',s2l2:'Target outcome in 90 days',s2l3:'Urgency',
+    goals:[['Save time — recover 2+ hours per day'],['Grow revenue without hiring more staff'],['Improve client experience'],['Reduce errors and manual mistakes'],['Scale — systems that run without me']],
+    urgencies:[['Exploring','No rush'],['Planning','Starting soon'],['Urgent','This month'],['Critical','Needed yesterday']],
+    urgencyVals:['Exploring','Planning','Urgent','Critical'],
+    s3h:'What tools do you already use?',s3sub:'We build automations that connect to what you already have.',s3l1:'Communication',s3l2:'Management & CRM',s3l3:'Technical level',
+    commTools:[['WhatsApp Business'],['Gmail / Google Workspace'],['Slack'],['Instagram / Facebook']],
+    crmTools:[['Google Sheets / Excel'],['Notion / Airtable'],['HubSpot / Salesforce'],['Custom software / ERP']],
+    techLevels:[['non-technical','Non-technical — I need everything handled'],['basic','Basic — I can follow instructions'],['intermediate','Intermediate — I can configure tools'],['technical','Technical — I have a developer on the team']],
+    s4h:'What\'s your budget?',s4sub:'Solutions from €149 to full enterprise.',s4l2:'Preferred engagement model',s4l3:'Decision timeline',
+    budgetLabels:['€149','€500','€2K','€5K','€10K+'],budgetVals:['€149','€500','€500-1K','€1K-2K','€2K-5K','€5K-10K','€10K-20K','€20K-50K','€50K+','Custom'],
+    engModels:[['one-time project','One-time project — build it, done'],['project + maintenance','Project + monthly maintenance'],['monthly retainer','Monthly retainer — ongoing partnership'],['full outsourcing','Full outsourcing — handle everything']],
+    timelines:[['this week','This week'],['this month','This month'],['next quarter','Next quarter'],['just researching','Just researching']],
+    s5h:'Almost there',s5sub:'Your briefing is generated instantly. You\'ll receive a PDF and a free 30-min strategy call.',
+    s5l1:'Full name',s5l2:'Email',s5l3:'WhatsApp (optional)',s5l4:'Additional notes (optional)',
+    captchaLbl:'Security verification',captchaOk:'Verified',captchaWrong:'Wrong answer',refreshBtn:'New',
+    rgpdLbl:'Data protection',
+    rgpd1txt:'I have read and accept Orvix\'s <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Use</a>.<span class="rgpd-required">*</span>',
+    rgpd2txt:'I agree to receive commercial communications from Orvix. I can unsubscribe at any time.',
+    rgpd3txt:'I agree for Orvix to contact me to offer a free strategy call about my briefing.',
+    rgpdInfoTitle:'Data protection information',
+    rgpdInfoText:'Controller: Orvix · Purpose: Generate your briefing and contact you if authorised · Rights: hello@orvix.es · More info: <a href="/privacy" style="color:var(--purple)">Privacy Policy</a>',
+    btnContinue:'Continue',btnGenerate:'Generate my briefing',
+    genTitle:'Generating your briefing...',genSub:'Our AI is analysing your inputs and building your personalised plan.',
+    genStepsList:['Analysing business profile & sector','Mapping pain points to automations','Selecting tools & integrations','Calculating ROI & timeline','Writing executive summary','Finalising briefing document'],
+    docBadge:'Automation Briefing · Orvix AI',mSec:'Sector',mTeam:'Team',mBudget:'Budget',mDate:'Generated',
+    scoreROIKey:'Est. annual savings',scoreTimeKey:'Hours saved / week',scorePaybackKey:'Payback period',
+    sec1:'Executive Summary',sec2:'Automation Opportunities',sec3:'Recommended Tech Stack',sec4:'Implementation Roadmap',sec5:'ROI Analysis',sec6:'Next Steps with Orvix',
+    actCopy:'Copy briefing',actNew:'New briefing',actCall:'Book free call',
+    liTitle:'Share your result on LinkedIn',liSub:'This post format gets 10-30k impressions.',liCopy:'Copy text',
+    gateH:'Get PDF + free strategy call',gateP:'We\'ll send the full PDF and book a free 30-min call with an Orvix specialist.',gateCta:'Send PDF',
+    footPrivacy:'Privacy',footTerms:'Terms',footRgpd:'GDPR',
+    err0:'Please fill in all fields.',err1:'Please describe your main frustration.',err2:'Please describe your 90-day outcome.',err5:'Please complete the verification and accept the privacy policy.',
+  }
+};
+
+let lang='es',currentStep=0,urgencyVal='',captchaA=0,captchaB=0,captchaOk=false;
+
+(function(){
+  const c=document.getElementById('ptx'),ctx=c.getContext('2d');let W,H,pts=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;pts=[];for(let i=0;i<50;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.4});}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(124,92,252,0.55)';ctx.fill();});for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(124,92,252,'+(0.1*(1-d/100))+')';ctx.lineWidth=.5;ctx.stroke();}}requestAnimationFrame(draw);}
+  window.addEventListener('resize',resize);resize();draw();
+})();
+
+function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach((b,i)=>b.classList.toggle('active',i===(l==='es'?0:1)));document.documentElement.lang=l;apply();rebuild();updateProgress();}
+function g(id){return document.getElementById(id);}
+function s(id,h){const e=g(id);if(e)e.innerHTML=h;}
+
+function apply(){
+  const L=T[lang];
+  const keys=['navBadge','pillText','h1a','h1b','h1c','heroSub','heroNote','s0h','s0sub','s0l1','s0l2','s0l3','s0l4','s1h','s1sub','s1l1','s1l2','s2h','s2sub','s2l1','s2l2','s2l3','s3h','s3sub','s3l1','s3l2','s3l3','s4h','s4sub','s4l2','s4l3','s5h','s5sub','s5l1','s5l2','s5l3','s5l4','captchaLbl','refreshBtn','rgpdLbl','rgpd1txt','rgpd2txt','rgpd3txt','rgpdInfoTitle','rgpdInfoText','btnGenerate','genTitle','genSub','docBadge','mSec','mTeam','mBudget','mDate','scoreROIKey','scoreTimeKey','scorePaybackKey','sec1','sec2','sec3','sec4','sec5','sec6','actCopy','actNew','actCall','liTitle','liSub','liCopy','gateH','gateP','gateCta','footPrivacy','footTerms','footRgpd','err0','err1','err2','err5'];
+  keys.forEach(k=>s(k,L[k]||''));
+  for(let i=0;i<5;i++)s('bc'+i,L.btnContinue);
+  for(let i=0;i<6;i++)s('sn'+i,'0'+(i+1)+' / 06 — '+L.stepTopics[i]);
+}
+
+function rebuild(){
+  const L=T[lang];
+  const sec=g('sector');sec.innerHTML=L.sectors.map(([n])=>'<option value="'+n+'">'+n+'</option>').join('');
+  g('teamSize').innerHTML=L.teamSizes.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
+  const pg=g('processGrid');const po=[...pg.querySelectorAll('.check-item.on')].map((_,i)=>i);
+  pg.innerHTML=L.processes.map(([n,sub],i)=>'<div class="check-item'+(po.includes(i)?' on':'')+'" onclick="toggleCheck(this)"><div class="check-box">✓</div><div><div class="check-label">'+n+'</div><div class="check-sub">'+sub+'</div></div></div>').join('');
+  g('primaryGoal').innerHTML=L.goals.map(([v])=>'<option value="'+v+'">'+v+'</option>').join('');
+  const ug=g('urgencyGrid');const pu=urgencyVal;
+  ug.innerHTML=L.urgencies.map(([label,sub],i)=>'<div class="urg-item'+(pu===L.urgencyVals[i]?' on':'')+'" onclick="selectUrgency(this,'+i+')"><div class="urg-label">'+label+'</div><div class="urg-sub">'+sub+'</div><div class="urg-bar"></div></div>').join('');
+  if(!pu){urgencyVal=L.urgencyVals[1];const els=document.querySelectorAll('.urg-item');if(els[1])els[1].classList.add('on');}
+  g('commGrid').innerHTML=L.commTools.map(([n])=>'<div class="check-item" onclick="toggleCheck(this)"><div class="check-box">✓</div><div><div class="check-label">'+n+'</div></div></div>').join('');
+  g('crmGrid').innerHTML=L.crmTools.map(([n])=>'<div class="check-item" onclick="toggleCheck(this)"><div class="check-box">✓</div><div><div class="check-label">'+n+'</div></div></div>').join('');
+  g('techLevel').innerHTML=L.techLevels.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
+  g('budgetLabels').innerHTML=L.budgetLabels.map(l=>'<span>'+l+'</span>').join('');
+  updateBudget();
+  g('engModel').innerHTML=L.engModels.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
+  g('timeline').innerHTML=L.timelines.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
+  g('genSteps').innerHTML=T[lang].genStepsList.map((st,i)=>'<div class="gen-step" id="gs'+i+'"><div class="gen-dot"></div>'+st+'</div>').join('');
+}
+
+function updateProgress(){
+  const pct=(currentStep/6)*100;g('progFill').style.width=pct+'%';
+  const L=T[lang];g('progressSteps').innerHTML=L.steps.map((st,i)=>'<span class="ps'+(i===currentStep?' active':i<currentStep?' done':'')+'">'+st+'</span>').join('');
+}
+
+function newCaptcha(){captchaA=Math.floor(Math.random()*10)+1;captchaB=Math.floor(Math.random()*10)+1;captchaOk=false;g('captchaEq').textContent=captchaA+' + '+captchaB+' =';g('captchaInp').value='';g('captchaStatus').textContent='';g('captchaStatus').className='captcha-status';checkGenBtn();}
+function checkCaptcha(){const v=parseInt(g('captchaInp').value);const st=g('captchaStatus');const L=T[lang];if(isNaN(v)){captchaOk=false;st.textContent='';st.className='captcha-status';}else if(v===captchaA+captchaB){captchaOk=true;st.textContent=L.captchaOk;st.className='captcha-status ok';}else{captchaOk=false;st.textContent=L.captchaWrong;st.className='captcha-status bad';}checkGenBtn();}
+function toggleRgpd(id){g(id).classList.toggle('on');checkGenBtn();}
+function checkGenBtn(){g('genBtn').disabled=!(captchaOk&&g('r1').classList.contains('on'));}
+function toggleCheck(el){el.classList.toggle('on');}
+function selectUrgency(el,idx){document.querySelectorAll('.urg-item').forEach(x=>x.classList.remove('on'));el.classList.add('on');urgencyVal=T[lang].urgencyVals[idx];}
+function updateBudget(){const v=parseInt(g('budgetRange').value);g('budgetDisplay').textContent=T[lang].budgetVals[v]||'500€';}
+function getChecked(id){return[...document.querySelectorAll('#'+id+' .check-item.on')].map(el=>el.querySelector('.check-label').textContent);}
+
+function nextStep(from){
+  const L=T[lang];
+  if(from===0&&(!g('bizName').value.trim()||!g('bizDesc').value.trim())){g('err0').className='err show';return;}
+  if(from===1&&!g('frustration').value.trim()){g('err1').className='err show';return;}
+  if(from===2&&!g('outcome90').value.trim()){g('err2').className='err show';return;}
+  g('step'+from).classList.remove('active');
+  currentStep=from+1;
+  g('step'+currentStep).classList.add('active');
+  if(g('err'+from))g('err'+from).className='err';
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevStep(from){g('step'+from).classList.remove('active');currentStep=from-1;g('step'+currentStep).classList.add('active');updateProgress();window.scrollTo({top:0,behavior:'smooth'});}
+
+async function generateBriefing(){
+  const name=g('contactName').value.trim(),email=g('contactEmail').value.trim();
+  if(!name||!email||!email.includes('@')||!captchaOk||!g('r1').classList.contains('on')){g('err5').className='err show';return;}
+  const data={bizName:g('bizName').value,sector:g('sector').value,teamSize:g('teamSize').value,bizDesc:g('bizDesc').value,processes:getChecked('processGrid'),frustration:g('frustration').value,goal:g('primaryGoal').value,outcome90:g('outcome90').value,urgency:urgencyVal,comm:getChecked('commGrid'),crm:getChecked('crmGrid'),techLevel:g('techLevel').value,budget:g('budgetDisplay').textContent,engModel:g('engModel').value,timeline:g('timeline').value,extraNotes:g('extraNotes').value};
+  g('step5').classList.remove('active');g('stepsWrap').style.display='none';document.querySelector('.progress-wrap').style.display='none';document.querySelector('.hero').style.display='none';g('genScreen').classList.add('active');
+  rebuild();window.scrollTo({top:0,behavior:'smooth'});
+  const gs=Array.from({length:6},(_,i)=>'gs'+i);
+  for(let i=0;i<6;i++){await delay(550);if(i>0)g(gs[i-1]).className='gen-step done';g(gs[i]).className='gen-step active-s';}
+  const ol=lang==='es'?'Spanish':'English';
+  const prompt='You are a senior automation consultant at Orvix. Write EVERYTHING in '+ol+'. Generate a professional automation briefing. Keep each text field under 400 words. Use \\n for line breaks inside strings. Never use unescaped quotes inside values.\n\nCLIENT:\nBusiness: '+data.bizName+' | Sector: '+data.sector+' | Team: '+data.teamSize+'\nDescription: '+data.bizDesc+'\nPain points: '+(data.processes.join(', ')||'General manual work')+'\nFrustration: '+data.frustration+'\nGoal: '+data.goal+'\n90-day outcome: '+data.outcome90+'\nUrgency: '+data.urgency+'\nTools: '+([...data.comm,...data.crm].join(', ')||'Basic')+'\nTech level: '+data.techLevel+'\nBudget: '+data.budget+'\nEngagement: '+data.engModel+'\nTimeline: '+data.timeline+'\nExtra: '+(data.extraNotes||'None')+'\n\nReturn ONLY valid JSON with these exact keys:\n{"executiveSummary":"2-3 paragraphs","opportunities":"4-5 bullet points","techStack":["Make","Twilio","Google Calendar"],"roadmap":"3 phases with timelines","roiBreakdown":"financial analysis with numbers","nextSteps":"3-4 action steps","annualSavings":"€X,XXX","hoursPerWeek":"XXh","paybackPeriod":"X weeks"}';
+  try{
+    // Proxy URL — cámbiala si tu Laravel está en otro dominio
+    const PROXY_URL = window.AI_PROXY_URL || 'http://127.0.0.1:8000/api/ai/proxy';
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
+    const apiData=await res.json();if(!res.ok||apiData.error)throw new Error(apiData.error?.message||apiData.error||'error');
+    const raw=apiData.content?.find(b=>b.type==='text')?.text||'';
+    const brief=normalizeBrief(apiData.briefing||parseBriefingJson(raw));
+    await delay(400);g(gs[5]).className='gen-step done';await delay(500);
+    const L=T[lang];
+    s('docTitle',data.bizName+' — Automation Briefing');s('docSector',data.sector);s('docTeam',data.teamSize);s('docBudget',data.budget);
+    s('docDate',new Date().toLocaleDateString(lang==='es'?'es-ES':'en-GB',{day:'numeric',month:'short',year:'numeric'}));
+    s('scoreROI',brief.annualSavings||'€9,800');s('scoreTime',brief.hoursPerWeek||'12h');s('scorePayback',brief.paybackPeriod||'4 weeks');
+    s('secSummary',fmt(brief.executiveSummary));s('secOpportunities',fmt(brief.opportunities));s('secRoadmap',fmt(brief.roadmap));s('secROI',fmt(brief.roiBreakdown));s('secNext',fmt(brief.nextSteps));
+    const stk=g('secStack');stk.innerHTML='';(brief.techStack||[]).forEach(item=>{const tg=document.createElement('span');tg.className='tag purple';tg.textContent=toText(item);stk.appendChild(tg);});
+    const liText=lang==='es'?'Acabo de generar el briefing de automatización de '+data.bizName+' con una herramienta de IA gratuita.\n\nResultados:\n— Ahorro anual estimado: '+(brief.annualSavings||'€9,800')+'\n— Horas recuperadas por semana: '+(brief.hoursPerWeek||'12h')+'\n— Retorno de inversión: '+(brief.paybackPeriod||'4 semanas')+'\n\n6 preguntas. La IA mapeó cada proceso manual a una automatización, eligió las herramientas y construyó la hoja de ruta completa.\n\nHerramienta gratuita de Orvix. Link en comentarios.\n\n#Automatización #InteligenciaArtificial #TransformaciónDigital #Pymes':'I just generated an automation briefing for '+data.bizName+' using a free AI tool.\n\nResults:\n— Estimated annual savings: '+(brief.annualSavings||'€9,800')+'\n— Hours recovered per week: '+(brief.hoursPerWeek||'12h')+'\n— Payback period: '+(brief.paybackPeriod||'4 weeks')+'\n\n6 questions. The AI mapped every manual process to a specific automation, chose the right tools and built the full roadmap.\n\nFree tool by Orvix. Link in comments.\n\n#Automation #AI #DigitalTransformation #SMB';
+    g('liPost').innerHTML=liText.replace(/\n/g,'<br>');window._liPost=liText;
+    window._briefingText=data.bizName+'\n\n'+toText(brief.executiveSummary)+'\n\n'+toText(brief.opportunities)+'\n\n'+toText(brief.roadmap)+'\n\n'+toText(brief.roiBreakdown)+'\n\n'+toText(brief.nextSteps);
+    g('genScreen').classList.remove('active');g('resultWrap').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    g('genScreen').classList.remove('active');document.querySelector('.hero').style.display='block';document.querySelector('.progress-wrap').style.display='block';g('stepsWrap').style.display='block';g('step5').classList.add('active');
+    const msg=e&&e.message&&e.message!=='error'?e.message:(lang==='es'?'Error al generar. Por favor, inténtalo de nuevo.':'Error generating. Please try again.');
+    g('err5').textContent=msg;g('err5').className='err show';
+  }
+}
+
+function repairJson(s){let o=String(s||'').trim().replace(/,\s*$/,'');const q=(o.match(/(?<!\\)"/g)||[]).length;if(q%2)o+='"';const st=[];let ins=false,esc=false;for(let i=0;i<o.length;i++){const c=o[i];if(esc){esc=false;continue;}if(c==='\\'){esc=true;continue;}if(c==='"'){ins=!ins;continue;}if(!ins){if(c==='{'||c==='[')st.push(c);else if(c==='}'||c===']')st.pop();}}while(st.length)o+=(st.pop()==='{'?'}':']');return o;}
+function parseBriefingJson(raw){let t=String(raw||'').replace(/```json|```/gi,'').replace(/[\s\S]*?<\/think>/gi,'').trim();const m=t.match(/\{[\s\S]*/);if(m)t=m[0];try{return JSON.parse(t);}catch(e1){try{return JSON.parse(repairJson(t));}catch(e2){throw new Error(lang==='es'?'Respuesta de IA incompleta. Inténtalo de nuevo.':'Incomplete AI response. Please try again.');}}}
+function toText(v){if(v==null||v==='')return'';if(typeof v==='string')return v;if(Array.isArray(v))return v.map(toText).filter(Boolean).join('\n');if(typeof v==='object')return Object.values(v).map(toText).filter(Boolean).join('\n');return String(v);}
+function normalizeBrief(b){['executiveSummary','opportunities','roadmap','roiBreakdown','nextSteps','annualSavings','hoursPerWeek','paybackPeriod'].forEach(k=>{if(b[k]!=null)b[k]=toText(b[k]);});if(typeof b.techStack==='string')b.techStack=b.techStack.split(/[,;]/).map(s=>s.trim()).filter(Boolean);if(Array.isArray(b.techStack))b.techStack=b.techStack.map(toText).filter(Boolean);else b.techStack=[];return b;}
+function fmt(t){const s=toText(t);if(!s)return'—';return s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+function copyBriefing(){navigator.clipboard.writeText(window._briefingText||'').then(()=>{const b=g('actCopyBtn');const o=b.innerHTML;b.textContent=lang==='es'?'Copiado':'Copied';setTimeout(()=>b.innerHTML=o,2000);});}
+function shareLinkedIn(){window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent('https://orvixio.netlify.app')+'&summary='+encodeURIComponent(window._liPost||''),'_blank');}
+function copyLiPost(){navigator.clipboard.writeText(window._liPost||'').then(()=>{const b=g('liCopyBtn');const o=b.innerHTML;b.textContent=lang==='es'?'Copiado':'Copied';b.style.color='var(--mint)';setTimeout(()=>{b.innerHTML=o;b.style.color='';},2000);});}
+function resetTool(){window.location.reload();}
+function submitGate(){const e=g('gateEmail').value.trim();if(!e||!e.includes('@')){g('gateEmail').style.borderColor='rgba(255,77,109,0.5)';return;}document.querySelector('.gate-block').innerHTML='<div style="color:var(--mint);font-size:15px;font-weight:700;margin-bottom:8px">'+(lang==='es'?'En camino.':'On its way.')+'</div><div style="font-size:13px;color:var(--muted3);line-height:1.6">'+(lang==='es'?'PDF enviado a':'PDF sent to')+' <strong style="color:var(--text)">'+e+'</strong>.<br><br><a href="https://orvixio.netlify.app" target="_blank" style="color:var(--purple);font-weight:700">'+(lang==='es'?'Visitar orvixio.netlify.app':'Visit orvixio.netlify.app')+' →</a></div>';}
+
+newCaptcha();apply();rebuild();updateProgress();
+</script>
+</body>
+</html>
