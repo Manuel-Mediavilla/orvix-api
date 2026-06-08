@@ -21,6 +21,7 @@ return [
 
     'allowed_origins' => [
         'https://orvixio.netlify.app',
+        'https://web-production-4f755.up.railway.app',
         'http://localhost:5500',
         'http://127.0.0.1:5500',
         'http://localhost:8000',
