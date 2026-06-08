@@ -37,6 +37,11 @@ class AiProxyController extends Controller
         }
         RateLimiter::hit($dayKey, 86400);
 
+        if (empty(env('OPENROUTER_API_KEY'))) {
+            Log::error('OPENROUTER_API_KEY no configurada');
+            return response()->json(['error' => 'API key no configurada en el servidor.'], 500);
+        }
+
         $validated = $request->validate([
             'messages'   => 'required|array|min:1|max:10',
             'messages.*.role'    => 'required|in:user,assistant',

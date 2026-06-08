@@ -3,7 +3,13 @@
 use App\Http\Controllers\AiProxyController;
 use Illuminate\Support\Facades\Route;
 
-// Proxy seguro hacia Anthropic API
-// Accesible en: POST /api/ai/proxy
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'app_key_set' => !empty(config('app.key')),
+        'openrouter_set' => !empty(env('OPENROUTER_API_KEY')),
+    ]);
+});
+
 Route::post('/ai/proxy', [AiProxyController::class, 'handle'])
-    ->middleware(['throttle:10,1']); // doble protección con middleware nativo
+    ->middleware(['throttle:10,1']);
