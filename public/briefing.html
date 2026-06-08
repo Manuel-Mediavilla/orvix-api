@@ -427,7 +427,7 @@ footer{position:relative;z-index:1;padding:22px 5%;border-top:1px solid var(--bo
 
 <script>
   // ─── CONFIGURACIÓN DEL PROXY ─────────────────────────────
-  window.AI_PROXY_URL = '/api/ai/proxy';
+  window.AI_PROXY_URL = 'https://web-production-4f755.up.railway.app/api/ai/proxy';
   // ──────────────────────────────────────────────────────────
 </script>
 <script>
@@ -603,7 +603,7 @@ async function generateBriefing(){
   const prompt='You are a senior automation consultant at Orvix. Write EVERYTHING in '+ol+'. Generate a professional automation briefing. Keep each text field under 400 words. Use \\n for line breaks inside strings. Never use unescaped quotes inside values.\n\nCLIENT:\nBusiness: '+data.bizName+' | Sector: '+data.sector+' | Team: '+data.teamSize+'\nDescription: '+data.bizDesc+'\nPain points: '+(data.processes.join(', ')||'General manual work')+'\nFrustration: '+data.frustration+'\nGoal: '+data.goal+'\n90-day outcome: '+data.outcome90+'\nUrgency: '+data.urgency+'\nTools: '+([...data.comm,...data.crm].join(', ')||'Basic')+'\nTech level: '+data.techLevel+'\nBudget: '+data.budget+'\nEngagement: '+data.engModel+'\nTimeline: '+data.timeline+'\nExtra: '+(data.extraNotes||'None')+'\n\nReturn ONLY valid JSON with these exact keys:\n{"executiveSummary":"2-3 paragraphs","opportunities":"4-5 bullet points","techStack":["Make","Twilio","Google Calendar"],"roadmap":"3 phases with timelines","roiBreakdown":"financial analysis with numbers","nextSteps":"3-4 action steps","annualSavings":"€X,XXX","hoursPerWeek":"XXh","paybackPeriod":"X weeks"}';
   try{
     // Proxy URL — cámbiala si tu Laravel está en otro dominio
-    const PROXY_URL = window.AI_PROXY_URL || 'http://127.0.0.1:8000/api/ai/proxy';
+    const PROXY_URL = window.AI_PROXY_URL || 'https://web-production-4f755.up.railway.app/api/ai/proxy';
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const apiData=await res.json();if(!res.ok||apiData.error)throw new Error(apiData.error?.message||apiData.error||'error');
     const raw=apiData.content?.find(b=>b.type==='text')?.text||'';
