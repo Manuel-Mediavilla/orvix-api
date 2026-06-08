@@ -15,7 +15,7 @@ class AiProxyController extends Controller
 
     public function handle(Request $request)
     {
-        $allowedOrigins = array_filter(explode(',', env('ALLOWED_ORIGINS', '')));
+        $allowedOrigins = array_filter(explode(',', config('orvix.allowed_origins', '')));
         $origin = $request->header('Origin', '');
         $sameOrigin = in_array($request->getSchemeAndHttpHost(), array_map(
             fn ($o) => rtrim($o, '/'),
@@ -37,7 +37,8 @@ class AiProxyController extends Controller
         }
         RateLimiter::hit($dayKey, 86400);
 
-        if (empty(env('OPENROUTER_API_KEY'))) {
+        $apiKey = config('services.openrouter.key');
+        if (empty($apiKey)) {
             Log::error('OPENROUTER_API_KEY no configurada');
             return response()->json(['error' => 'API key no configurada en el servidor.'], 500);
         }
@@ -50,9 +51,9 @@ class AiProxyController extends Controller
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type'  => 'application/json',
-                'HTTP-Referer'  => env('APP_URL', 'https://orvixio.netlify.app'),
+                'HTTP-Referer'  => config('app.url', 'https://orvixio.netlify.app'),
                 'X-Title'       => 'Orvix Briefing Generator',
             ])
             ->timeout(60)
