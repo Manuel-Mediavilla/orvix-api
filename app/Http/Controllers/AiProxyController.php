@@ -37,7 +37,8 @@ class AiProxyController extends Controller
         }
         RateLimiter::hit($dayKey, 86400);
 
-        $apiKey = config('services.openrouter.key') ?: getenv('OPENROUTER_API_KEY') ?: '';
+        $apiKey = config('services.openrouter.key')
+            ?: ($_ENV['OPENROUTER_API_KEY'] ?? $_SERVER['OPENROUTER_API_KEY'] ?? getenv('OPENROUTER_API_KEY') ?: '');
         if (empty($apiKey)) {
             Log::error('OPENROUTER_API_KEY no configurada');
             return response()->json(['error' => 'API key no configurada en el servidor.'], 500);
