@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && vendor/bin/heroku-php-apache2 public/"
+    "startCommand": "bash scripts/railway-start.sh",
     "healthcheckPath": "/up",
     "restartPolicyType": "ON_FAILURE"
   }
